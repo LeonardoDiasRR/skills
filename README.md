@@ -28,6 +28,17 @@ Uma skill para automatizar interações com o Sistema Eletrônico de Informaçõ
 
 **Versão:** 1.0.0
 
+### 3. [groq-whisper-transcription](./groq-whisper-transcription/)
+A skill that enables AI agents (like OpenClaw and Hermes) to understand and respond to audio/voice messages naturally — as if they had received a plain text message. Uses the Groq API with Whisper models via `curl`.
+
+**Key Features:**
+- Supports Telegram and WhatsApp audio formats (`.ogg`, `.oga`, `.opus`, `.m4a`, `.mp3`, `.wav`)
+- Uses `curl` only — no Python SDK required
+- Agent responds to the message content naturally, never exposing the transcription
+- Optional `ffmpeg` conversion for unsupported formats
+
+**Version:** 1.0.0
+
 ---
 
 ## 🎯 Purpose
