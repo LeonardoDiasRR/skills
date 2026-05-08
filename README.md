@@ -15,6 +15,19 @@ A skill designed to help AI agents (like OpenClaw, Hermes, and similar) correctl
 
 **Version:** 1.2.0
 
+### 2. [sei](./sei/)
+Uma skill para automatizar interações com o Sistema Eletrônico de Informações (SEI), usado por instituições públicas brasileiras.
+
+**Principais Funcionalidades:**
+- Autenticação automática e detecção de sessão
+- Pesquisa de processos e documentos por número
+- Filtro de processos atribuídos ao usuário
+- Geração e download de arquivos ZIP de processos
+- Suporte multi-instituição (qualquer órgão que use SEI)
+- Tratamento de erros e validação de estados
+
+**Versão:** 1.0.0
+
 ---
 
 ## 🎯 Purpose
