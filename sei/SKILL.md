@@ -1,6 +1,6 @@
 ---
 name: sei
-description: "Skill para interagir com o sistema SEI (Sistema Eletrônico de Informações), usado por diversas instituições públicas brasileiras. Use sempre que o usuário mencionar: abrir ou pesquisar processo SEI, abrir ou pesquisar documento SEI pelo número, filtrar processos atribuídos ao usuário, gerar arquivo ZIP de documentos de processo aberto, ou qualquer tarefa no sistema SEI — independentemente da instituição (Polícia Federal, Ministérios, autarquias, etc.). Inclui: detecção automática de sessão ativa, login assistido, pesquisa rápida por número de processo ou documento, filtro de processos atribuídos, navegação no sistema, extração de documentos ZIP e retorno à listagem."
+description: "Skill para interagir com o sistema SEI (Sistema Eletrônico de Informações), usado por diversas instituições públicas brasileiras. Use sempre que o usuário mencionar: abrir ou pesquisar processo SEI, abrir ou pesquisar documento SEI pelo número, trocar unidade ativa, filtrar processos atribuídos ao usuário, gerar arquivo ZIP de documentos de processo aberto, resumir processo, ou qualquer tarefa no sistema SEI — independentemente da instituição (Polícia Federal, Ministérios, autarquias, etc.). Inclui: detecção automática de sessão ativa, login assistido, troca de unidade, pesquisa rápida por número de processo ou documento, filtro de processos atribuídos, navegação no sistema, extração de documentos ZIP, resumo inteligente de processos e retorno à listagem."
 ---
 
 ## Objetivo
@@ -117,6 +117,115 @@ Clicar no botão [X] no canto superior direito do pop-up
 ✅ Usuário autenticado no sistema SEI  
 ✅ Pop-up de notificações fechado  
 ✅ Página "Controle de Processos" visível e pronta para uso
+
+---
+
+## Fluxo: Trocar Unidade do Usuário
+
+Use este fluxo quando o usuário quiser trocar a unidade ativa no SEI. A unidade determina quais processos são exibidos no "Controle de Processos" e em qual contexto as ações são realizadas. Requer que o usuário já esteja autenticado no SEI (execute o Fluxo de Login primeiro, se necessário).
+
+---
+
+### **Passo 1: Verificar acesso ao SEI**
+**Ação:**
+```
+Executar o "Passo Inicial: Detectar Sessão e Obter Acesso ao SEI"
+```
+Se o usuário já estiver autenticado no SEI, prosseguir diretamente para o Passo 2. Caso contrário, executar o Fluxo de Login primeiro.
+
+---
+
+### **Passo 2: Abrir a página de seleção de unidade**
+**Objetivo:** Acessar a lista de unidades disponíveis para o usuário
+
+**Ação:**
+```
+Localizar e clicar no campo de unidade atual exibido no header, à direita da barra de pesquisa
+```
+
+**Elemento a localizar:**
+- **Tipo:** Campo/link clicável no header
+- **Conteúdo:** Sigla da unidade atual do usuário (ex: `SELOG/SR/PF/RR`)
+- **Localização:** Header superior, imediatamente à direita da barra de pesquisa ("Pesquisar...")
+- **Query para find:** `"unidade atual do usuário no header"`
+
+**Verificação:**
+- A página deve navegar para a tela **"Trocar Unidade [SIGLA_ATUAL]"**
+- Deve exibir uma tabela com colunas: **Sigla**, **Descrição**, **Órgão**
+- O cabeçalho deve indicar o total de registros: `"Lista de Unidades com Permissão (N registros)"`
+- A unidade atual deve aparecer com o radio button selecionado (destacada em azul)
+
+---
+
+### **Passo 3: Identificar a unidade desejada**
+**Objetivo:** Localizar a unidade-alvo na lista de unidades disponíveis
+
+**Ação:**
+```
+1. Verificar se a unidade desejada está visível na lista
+2. SE não estiver visível → usar os campos de filtro "Sigla" ou "Descrição" e clicar em "Pesquisar"
+3. Localizar a linha correspondente à unidade desejada
+```
+
+**Elementos de filtro (opcionais):**
+- **Campo "Sigla":** Filtrar por sigla parcial ou completa (ex: `SETEC`)
+- **Campo "Descrição":** Filtrar por nome da unidade
+- **Botão:** "Pesquisar" — canto superior direito da página
+
+**Verificação:**
+```
+SE a unidade desejada aparece na lista
+  ENTÃO prosseguir para o Passo 4 ✓
+SENÃO
+  ENTÃO informar ao usuário que a unidade não está disponível para sua conta ✗
+```
+
+---
+
+### **Passo 4: Selecionar a unidade desejada**
+**Objetivo:** Trocar a unidade ativa clicando no radio button da unidade desejada
+
+**Ação:**
+```
+Clicar no radio button à esquerda da linha da unidade desejada
+```
+
+**Elemento a localizar:**
+- **Tipo:** Radio button
+- **Localização:** Coluna mais à esquerda da tabela, na linha da unidade desejada
+- **Query para find:** `"radio button [SIGLA_DA_UNIDADE]"`
+
+**Verificação:**
+- O sistema deve redirecionar automaticamente para a página **"Controle de Processos"** da nova unidade
+- A troca ocorre imediatamente ao clicar — não há botão de confirmação separado
+
+---
+
+### **Passo 5: Confirmar a troca de unidade**
+**Objetivo:** Verificar que a unidade ativa foi alterada corretamente
+
+**Ação:**
+```
+Verificar o campo de unidade no header (à direita da barra de pesquisa)
+```
+
+**Verificação:**
+```
+SE o campo de unidade no header exibe a sigla da unidade recém-selecionada
+  ENTÃO troca realizada com sucesso ✓
+SENÃO
+  ENTÃO a troca não foi efetivada — repetir o Passo 4 ✗
+```
+
+**Notas Importantes:**
+- A lista de processos exibida no "Controle de Processos" reflete a nova unidade
+- Filtros ativos anteriormente (ex: "Atribuídos a mim") são resetados após a troca
+- Este é o **último passo deste fluxo**
+
+**Resultado Final do Fluxo:**
+✅ Unidade trocada para a unidade desejada  
+✅ Campo de unidade no header exibe a nova sigla  
+✅ Página "Controle de Processos" exibindo processos da nova unidade
 
 ---
 
@@ -465,6 +574,226 @@ Clicar no ícone "Controle de Processos" no header/navegação superior
 
 ---
 
+## Fluxo: Resumir Processo
+
+Use este fluxo quando o usuário solicitar um resumo de um processo SEI aberto. O agente deve adaptar a estratégia de leitura conforme o tamanho do processo, priorizando sempre os documentos mais relevantes para identificar **por que o processo foi encaminhado ao setor do usuário**.
+
+---
+
+### **Passo 1: Verificar que está em um processo aberto**
+**Objetivo:** Confirmar que o usuário está visualizando um processo específico antes de iniciar a leitura
+
+**Ação:**
+```
+Verificar se a URL contém "acao=procedimento_trabalhar"
+E se o painel esquerdo mostra a árvore de documentos do processo
+```
+
+**Verificação:**
+- A URL deve conter: `acao=procedimento_trabalhar`
+- O painel esquerdo deve exibir a estrutura de volumes e documentos
+- O número do processo deve estar visível no header ou título
+
+**Se NÃO estiver em um processo aberto:**
+- Execute o Fluxo "Pesquisar e Abrir Processo pelo Número", OU
+- Execute o Fluxo "Filtrar Processos Atribuídos ao Usuário" e clique em um processo da lista
+
+---
+
+### **Passo 2: Contar os volumes do processo**
+**Objetivo:** Determinar a estratégia de leitura com base no tamanho do processo
+
+**Ação:**
+```
+1. Observar a árvore de documentos no painel esquerdo
+2. Contar o número de volumes listados (Volume I, Volume II, Volume III, etc.)
+3. Registrar o número total de volumes
+```
+
+**Elemento a localizar:**
+- **Tipo:** Itens da árvore de documentos no painel esquerdo
+- **Visual:** Ícones de pasta com rótulos "I", "II", "III", etc. (volumes em algarismos romanos)
+- **Query para find:** `"volumes lista árvore documentos processo"`
+
+**Decisão:**
+```
+SE número de volumes ≤ 5
+  ENTÃO executar Estratégia A: Download ZIP e leitura completa
+SENÃO (número de volumes > 5)
+  ENTÃO executar Estratégia B: Leitura seletiva dos documentos iniciais e finais
+```
+
+---
+
+### **Estratégia A: Processo com até 5 volumes — Leitura completa via ZIP**
+
+Use quando o processo tiver **5 volumes ou menos** (até aproximadamente 100 documentos no total).
+
+#### **Passo A1: Baixar o arquivo ZIP do processo**
+**Objetivo:** Obter todos os documentos do processo de uma só vez
+
+**Ação:**
+```
+Executar o Fluxo "Gerar Arquivo ZIP de Processo" na íntegra
+```
+
+- Localize o ícone ZIP na barra de ferramentas (ícone verde com "ZIP")
+- Selecione "Todos os documentos disponíveis"
+- Clique em "Gerar" e aguarde o download
+
+**Verificação:**
+- Arquivo `SEI_[número_do_processo].zip` salvo na pasta de downloads
+- O nome do arquivo confirma o processo correto
+
+---
+
+#### **Passo A2: Ler e analisar todos os documentos**
+**Objetivo:** Extrair as informações relevantes de todos os documentos do processo
+
+**Ação:**
+```
+1. Acessar o arquivo ZIP baixado
+2. Extrair e ler todos os documentos disponíveis
+3. Identificar em cada documento:
+   - Tipo e data do documento
+   - Unidade de origem
+   - Principais informações, decisões ou solicitações
+   - Qualquer referência ao motivo do encaminhamento ao setor do usuário
+```
+
+**Notas Importantes:**
+- Documentos em PDF podem exigir OCR se forem imagens escaneadas
+- Priorize documentos do tipo: Despacho, Informação, Ofício, Decisão, Memorando
+- Anote a sequência cronológica dos documentos para entender o fluxo do processo
+
+---
+
+#### **Passo A3: Produzir o resumo completo**
+**Objetivo:** Consolidar as informações em um resumo claro e objetivo
+
+**Ação:**
+```
+Produzir um resumo estruturado com os seguintes elementos:
+1. Identificação do processo (número, tipo, assunto)
+2. Origem e motivação (como e por que o processo foi aberto)
+3. Trâmite (principais etapas, decisões e encaminhamentos)
+4. Situação atual (último despacho, unidades com o processo aberto)
+5. Motivo do encaminhamento ao setor do usuário (insight principal)
+```
+
+**Resultado Final da Estratégia A:**
+✅ Todos os documentos lidos  
+✅ Resumo completo produzido  
+✅ Motivo do encaminhamento ao setor identificado  
+
+---
+
+### **Estratégia B: Processo com mais de 5 volumes — Leitura seletiva**
+
+Use quando o processo tiver **mais de 5 volumes**. Neste caso, leia os **5 primeiros** e os **5 últimos** documentos da árvore, que concentram as informações mais relevantes: a origem do processo e o motivo do encaminhamento ao setor atual.
+
+#### **Passo B1: Identificar e ler os 5 primeiros documentos**
+**Objetivo:** Compreender a origem e motivação inicial do processo
+
+**Ação:**
+```
+1. No painel esquerdo, expandir o primeiro volume (Volume I)
+2. Clicar no primeiro documento da lista
+3. Ler o conteúdo exibido no painel direito
+4. Repetir para os próximos 4 documentos em ordem sequencial
+5. Se o Volume I tiver menos de 5 documentos, continuar no Volume II
+```
+
+**Elemento a localizar:**
+- **Tipo:** Links de documentos no painel esquerdo
+- **Localização:** Primeiro volume expandido, documentos listados de cima para baixo
+- **Query para find:** `"primeiro documento lista árvore volume"`
+
+**O que extrair:**
+- Tipo e assunto do processo
+- Unidade e servidor que abriu o processo
+- Motivação original (pedido, solicitação, determinação, etc.)
+- Data de abertura
+
+---
+
+#### **Passo B2: Identificar e ler os 5 últimos documentos**
+**Objetivo:** Compreender o estado atual e o motivo do encaminhamento ao setor do usuário
+
+**Ação:**
+```
+1. No painel esquerdo, expandir o último volume (de maior numeração)
+2. Rolar até o final da lista de documentos desse volume
+3. Clicar no último documento da lista
+4. Ler o conteúdo exibido no painel direito
+5. Repetir para os 4 documentos anteriores em ordem reversa
+6. Se o último volume tiver menos de 5 documentos, retroceder ao volume anterior
+```
+
+**O que extrair:**
+- Último despacho ou encaminhamento
+- Motivo pelo qual o processo foi enviado ao setor do usuário
+- Solicitação ou pendência específica dirigida ao setor
+- Prazo ou urgência, se mencionado
+
+**Notas Importantes:**
+- Os documentos finais são os mais críticos: eles explicam **por que o processo está com o usuário**
+- Preste atenção especial a despachos com verbos como "encaminhar", "solicitar providências", "para manifestação", "para ciência", "para adoção de medidas"
+- Identifique se há uma ação específica esperada do setor do usuário
+
+---
+
+#### **Passo B3: Produzir o resumo seletivo**
+**Objetivo:** Consolidar as informações lidas em um resumo claro, com aviso de limitação
+
+**Ação:**
+```
+Produzir um resumo estruturado com os seguintes elementos:
+1. Aviso de limitação: informar que o resumo é baseado nos 5 primeiros e 5 últimos documentos
+2. Identificação do processo (número, tipo, assunto)
+3. Origem e motivação (com base nos primeiros documentos)
+4. Situação atual (com base nos últimos documentos)
+5. Motivo do encaminhamento ao setor do usuário (insight principal)
+6. Ação esperada do setor, se identificada
+```
+
+**Texto de aviso a incluir no resumo:**
+> ⚠️ *Este resumo foi elaborado com base nos 5 primeiros e nos 5 últimos documentos do processo, pois o processo possui mais de 5 volumes. Informações intermediárias podem não estar refletidas.*
+
+**Resultado Final da Estratégia B:**
+✅ Primeiros 5 documentos lidos (origem do processo)  
+✅ Últimos 5 documentos lidos (situação atual e motivo do encaminhamento)  
+✅ Resumo seletivo produzido com aviso de limitação  
+✅ Motivo do encaminhamento ao setor identificado  
+
+---
+
+### **Estrutura recomendada do resumo (ambas as estratégias)**
+
+```
+**Processo:** [número]
+**Assunto:** [assunto/tipo do processo]
+**Aberto por:** [unidade/servidor de origem] em [data]
+
+**Origem:** [breve descrição de como e por que o processo foi aberto]
+
+**Trâmite:** [principais etapas e encaminhamentos, em ordem cronológica]
+
+**Situação atual:** [último despacho, unidades com o processo aberto]
+
+**Por que está com o seu setor:** [insight principal — motivo do encaminhamento e ação esperada]
+```
+
+---
+
+**Resultado Final do Fluxo:**
+✅ Estratégia de leitura definida com base no número de volumes  
+✅ Documentos relevantes lidos e analisados  
+✅ Resumo estruturado produzido  
+✅ Insight sobre o motivo do encaminhamento ao setor identificado e destacado
+
+---
+
 ## Tratamento de Erros
 
 ### Erro: Pop-up não fecha no Passo 3
@@ -505,6 +834,37 @@ Clicar no ícone "Controle de Processos" no header/navegação superior
 - Execute o Fluxo "Filtrar Processos Atribuídos ao Usuário" e clique em um processo da lista, OU
 - Navegue até "Controle de Processos" e clique em qualquer processo
 
+### Erro: Unidade não encontrada no Passo 3 (Fluxo "Trocar Unidade do Usuário")
+**Solução:**
+- Verificar a ortografia da sigla ou nome da unidade
+- Usar os campos de filtro "Sigla" ou "Descrição" para buscar
+- Confirmar com o usuário se ele tem permissão de acesso à unidade desejada
+- Se a unidade não aparecer, o usuário não possui permissão para acessá-la
+
+### Erro: Troca de unidade não efetivada no Passo 5 (Fluxo "Trocar Unidade do Usuário")
+**Solução:**
+- Verificar se o radio button foi clicado corretamente
+- Aguardar alguns segundos para o sistema processar (pode haver lentidão)
+- Repetir o Passo 4 clicando novamente no radio button
+- Se persistir, recarregar a página e tentar novamente
+
+### Erro: Documentos no ZIP ilegíveis (Fluxo "Resumir Processo" - Estratégia A)
+**Solução:**
+- Ler os documentos diretamente pela árvore do processo no painel esquerdo
+- Clicar em cada documento e usar get_page_text para extrair o conteúdo textual
+- Se o PDF for imagem escaneada, pode ser necessário OCR externo
+
+### Erro: Volume não expande na árvore de documentos (Fluxo "Resumir Processo")
+**Solução:**
+- Clicar diretamente no ícone de pasta do volume para expandi-lo
+- Aguardar o carregamento e tentar novamente
+- Se persistir, recarregar a página do processo
+
+### Erro: Processo com muitos documentos por volume (Fluxo "Resumir Processo")
+**Solução:**
+- Manter a estratégia definida pelo número de volumes
+- Na Estratégia B, garantir que os 5 primeiros e 5 últimos sejam os documentos nas extremidades absolutas da árvore (não apenas do volume)
+
 ---
 
 ## Checkpoints Críticos
@@ -515,6 +875,9 @@ Os seguintes checkpoints devem ser validados em TODOS os ciclos:
 |-----------|-------|---------|--------|
 | **Fluxo: Login no SEI** |
 | Pop-up fechado | 3 | Ausência do modal | ✓ Obrigatório |
+| **Fluxo: Trocar Unidade do Usuário** |
+| Página de troca aberta | 2 | Título "Trocar Unidade [SIGLA_ATUAL]" | ✓ Obrigatório |
+| Unidade trocada | 5 | Sigla da nova unidade no header | ✓ Obrigatório |
 | **Fluxo: Filtrar Processos Atribuídos ao Usuário** |
 | Filtro aplicado | 3 | "Remover filtro de processos atribuídos a mim" | ✓ Obrigatório |
 | **Fluxo: Gerar Arquivo ZIP de Processo** |
@@ -523,6 +886,12 @@ Os seguintes checkpoints devem ser validados em TODOS os ciclos:
 | Opção correta selecionada | 3 | "Todos os documentos disponíveis" marcado | ✓ Obrigatório |
 | Download iniciado | 4 | Arquivo ZIP no folder downloads | ✓ Obrigatório |
 | Retorno à lista (opcional) | 5 | Título "Controle de Processos" | ○ Opcional |
+| **Fluxo: Resumir Processo** |
+| Processo aberto | 1 | Número do processo no header | ✓ Obrigatório |
+| Volumes contados | 2 | Número de volumes registrado | ✓ Obrigatório |
+| Estratégia definida | 2 | A ou B conforme número de volumes | ✓ Obrigatório |
+| Documentos lidos | A2/B1/B2 | Conteúdo extraído com sucesso | ✓ Obrigatório |
+| Resumo produzido | A3/B3 | Resumo estruturado completo | ✓ Obrigatório |
 
 ---
 
@@ -533,6 +902,11 @@ Os seguintes checkpoints devem ser validados em TODOS os ciclos:
 ✅ Pop-up de notificações fechado  
 ✅ Página "Controle de Processos" visível e pronta para uso
 
+### Após completar o Fluxo "Trocar Unidade do Usuário":
+✅ Unidade trocada para a unidade desejada  
+✅ Campo de unidade no header exibe a nova sigla  
+✅ Página "Controle de Processos" exibindo processos da nova unidade
+
 ### Após completar o Fluxo "Filtrar Processos Atribuídos ao Usuário":
 ✅ Filtro "Atribuídos a mim" aplicado e ativo  
 ✅ Página "Controle de Processos" exibindo apenas processos do usuário  
@@ -542,4 +916,10 @@ Os seguintes checkpoints devem ser validados em TODOS os ciclos:
 ✅ Arquivo ZIP gerado com todos os documentos do processo  
 ✅ Nome do arquivo: `SEI_[número_do_processo].zip`  
 ✅ Arquivo salvo na pasta de downloads  
-✅ (Opcional) Retorno à página de origem  
+✅ (Opcional) Retorno à página de origem
+
+### Após completar o Fluxo "Resumir Processo":
+✅ Estratégia de leitura definida (A ou B conforme número de volumes)  
+✅ Documentos relevantes lidos e analisados  
+✅ Resumo estruturado produzido  
+✅ Insight sobre o motivo do encaminhamento ao setor identificado  

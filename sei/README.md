@@ -7,9 +7,11 @@ Uma skill desenvolvida para auxiliar agentes de IA (como GitHub Copilot, Claude,
 O SEI é uma plataforma de gestão de processos e documentos eletrônicos adotada por centenas de órgãos públicos no Brasil. Esta skill fornece instruções estruturadas para que agentes de IA possam:
 
 - **Autenticar** usuários no sistema
+- **Trocar unidade ativa** do usuário
 - **Pesquisar e abrir** processos e documentos por número
 - **Filtrar** processos atribuídos ao usuário
 - **Gerar e baixar** arquivos ZIP contendo todos os documentos de um processo
+- **Resumir processos** de forma inteligente, adaptando a estratégia ao tamanho
 - **Navegar** entre páginas e validar estados do sistema
 
 ## 🎯 Casos de Uso
@@ -28,6 +30,12 @@ Aplica filtros para exibir apenas processos atribuídos ao usuário logado, com 
 
 ### Geração de ZIP
 Gera e baixa arquivos ZIP contendo todos os documentos de um processo, com nomenclatura padronizada `SEI_[número_do_processo].zip`.
+
+### Troca de Unidade
+Permite trocar a unidade ativa do usuário, alterando o contexto de trabalho e os processos exibidos no "Controle de Processos".
+
+### Resumo de Processo
+Gera resumos inteligentes de processos, adaptando a estratégia de leitura ao tamanho: leitura completa para processos pequenos (até 5 volumes) ou leitura seletiva dos primeiros e últimos documentos para processos grandes (mais de 5 volumes). Identifica o motivo do encaminhamento ao setor do usuário.
 
 ## ✨ Principais Características
 
@@ -62,21 +70,31 @@ Autentica o usuário no sistema, fecha pop-ups e prepara a interface para uso.
 2. Solicitar e inserir credenciais
 3. Fechar pop-up de notificações
 
-### 2. Fluxo: Pesquisar e Abrir Processo pelo Número
+### 2. Fluxo: Trocar Unidade do Usuário
+Permite trocar a unidade ativa, alterando o contexto de trabalho do usuário.
+
+**Passos:**
+1. Verificar acesso ao SEI
+2. Abrir a página de seleção de unidade
+3. Identificar a unidade desejada
+4. Selecionar a unidade desejada
+5. Confirmar a troca de unidade
+
+### 3. Fluxo: Pesquisar e Abrir Processo pelo Número
 Localiza e abre um processo específico usando a barra de pesquisa rápida.
 
 **Passos:**
 1. Verificar acesso ao SEI
 2. Usar a barra de pesquisa rápida no header
 
-### 3. Fluxo: Pesquisar e Abrir Documento pelo Número SEI
+### 4. Fluxo: Pesquisar e Abrir Documento pelo Número SEI
 Localiza e abre um documento específico pelo número SEI.
 
 **Passos:**
 1. Verificar acesso ao SEI
 2. Usar a barra de pesquisa rápida no header
 
-### 4. Fluxo: Filtrar Processos Atribuídos ao Usuário
+### 5. Fluxo: Filtrar Processos Atribuídos ao Usuário
 Aplica filtro para exibir apenas processos atribuídos ao usuário logado.
 
 **Passos:**
@@ -84,7 +102,7 @@ Aplica filtro para exibir apenas processos atribuídos ao usuário logado.
 2. Aplicar filtro "Ver atribuídos a mim"
 3. Verificar se o filtro foi aplicado
 
-### 5. Fluxo: Gerar Arquivo ZIP de Processo
+### 6. Fluxo: Gerar Arquivo ZIP de Processo
 Gera e baixa um arquivo ZIP contendo todos os documentos de um processo aberto.
 
 **Passos:**
@@ -93,6 +111,16 @@ Gera e baixa um arquivo ZIP contendo todos os documentos de um processo aberto.
 3. Configurar opções (todos os documentos)
 4. Baixar o arquivo ZIP
 5. (Opcional) Retornar à página de Controle de Processos
+
+### 7. Fluxo: Resumir Processo
+Gera resumos inteligentes de processos abertos, adaptando a estratégia ao tamanho do processo.
+
+**Passos:**
+1. Verificar que está em um processo aberto
+2. Contar os volumes do processo
+3. **Estratégia A (até 5 volumes):** Baixar ZIP e ler todos os documentos
+4. **Estratégia B (mais de 5 volumes):** Ler os 5 primeiros e 5 últimos documentos
+5. Produzir resumo estruturado identificando o motivo do encaminhamento ao setor
 
 ## 🔧 Requisitos
 
@@ -117,17 +145,31 @@ Soluções específicas para os problemas mais comuns em cada fluxo.
 
 ## 🎓 Exemplo de Uso Combinado
 
-Para processar múltiplos processos atribuídos ao usuário:
+### Exemplo 1: Processar múltiplos processos atribuídos ao usuário
+
+```
+1. Executar Fluxo de Login (se necessário)
+2. Executar Fluxo "Trocar Unidade do Usuário" (se necessário)
+3. Executar Fluxo "Filtrar Processos Atribuídos ao Usuário"
+4. Para cada processo na lista:
+   a. Clicar no processo para abri-lo
+   b. Executar Fluxo "Gerar Arquivo ZIP de Processo"
+   c. Retornar à lista
+   d. Verificar se o filtro continua ativo
+5. Repetir até processar todos os processos
+```
+
+### Exemplo 2: Resumir processos atribuídos para análise rápida
 
 ```
 1. Executar Fluxo de Login (se necessário)
 2. Executar Fluxo "Filtrar Processos Atribuídos ao Usuário"
 3. Para cada processo na lista:
    a. Clicar no processo para abri-lo
-   b. Executar Fluxo "Gerar Arquivo ZIP de Processo"
-   c. Retornar à lista
-   d. Verificar se o filtro continua ativo
-4. Repetir até processar todos os processos
+   b. Executar Fluxo "Resumir Processo"
+   c. Anotar o motivo do encaminhamento e ação esperada
+   d. Retornar à lista
+4. Priorizar ações com base nos resumos obtidos
 ```
 
 ## ⚠️ Considerações Importantes
