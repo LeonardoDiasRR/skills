@@ -39,6 +39,30 @@ A skill that enables AI agents (like OpenClaw and Hermes) to understand and resp
 
 **Version:** 1.0.0
 
+### 4. [hubdev](./hubdev/)
+Uma skill para consultar APIs do Hub do Desenvolvedor via `curl`, incluindo dados cadastrais de CNPJ, enquadramento no Simples Nacional/SIMEI e consultas de CPF na Receita Federal.
+
+**Principais Funcionalidades:**
+- Consulta de CNPJ via `WSCNPJ1` com retorno JSON enriquecido com dados do Simples Nacional
+- Consulta específica de Simples Nacional, SIMEI e MEI via `WSSIMPLESJSON`
+- Consulta de CPF com suporte a modo normal e turbo
+- Uso de autenticação por token e exemplos completos com `curl`
+- Tratamento de erros comuns e recomendações de timeout
+
+**Versão:** 1.0.0
+
+### 5. [viacep](./viacep/)
+A skill that teaches AI agents how to query Brazilian CEP address data through the free ViaCEP web service using `curl`.
+
+**Key Features:**
+- Query CEP data through `https://viacep.com.br/ws/{CEP}/json/`
+- Normalize formatted CEPs such as `01001-000` to 8 digits
+- Validate CEP format before calling the API
+- Handle not-found responses with `{ "erro": true }`
+- Return address fields such as street, neighborhood, city, state, IBGE code, DDD, and SIAFI
+
+**Version:** 1.0.0
+
 ---
 
 ## 🎯 Purpose
