@@ -1,15 +1,15 @@
 ---
 name: sei
-description: "Skill para interagir com o sistema SEI (Sistema Eletrônico de Informações), usado por diversas instituições públicas brasileiras. Use sempre que o usuário mencionar: abrir ou pesquisar processo SEI, abrir ou pesquisar documento SEI pelo número, trocar unidade ativa, filtrar processos atribuídos ao usuário, gerar arquivo ZIP de documentos de processo aberto, resumir processo, ou qualquer tarefa no sistema SEI — independentemente da instituição (Polícia Federal, Ministérios, autarquias, etc.). Inclui: detecção automática de sessão ativa, login assistido, troca de unidade, pesquisa rápida por número de processo ou documento, filtro de processos atribuídos, navegação no sistema, extração de documentos ZIP, resumo inteligente de processos e retorno à listagem."
+description: "Skill para interagir com o sistema SEI (Sistema Eletrônico de Informações), usado por diversas instituições públicas brasileiras. Use sempre que o usuário mencionar: abrir ou pesquisar processo SEI, abrir documento SEI, filtrar processos atribuídos, trocar unidade, gerar ZIP de processo, resumir processo SEI, ou qualquer navegação/ação típica dentro do sistema SEI."
 ---
 
 ## Objetivo
 Automatizar o acesso ao sistema SEI e interagir com processos e documentos de forma estruturada, funcionando para qualquer instituição que utilize o SEI.
 
 ## Sobre o SEI
-O SEI (Sistema Eletrônico de Informações) é uma plataforma de gestão de processos e documentos eletrônicos utilizada por centenas de instituições públicas brasileiras. Cada instituição tem sua própria URL (ex: `https://sei4.pf.gov.br/sei/` para a Polícia Federal, `https://sei.fazenda.gov.br/sei/` para a Receita Federal, etc.).
+O SEI (Sistema Eletrônico de Informações) é uma plataforma de gestão de processos e documentos eletrônicos utilizada por centenas de instituições públicas brasileiras. Cada instituição possui sua própria instância do sistema, com URL própria.
 
-**Importante:** A interface do SEI pode apresentar variações entre diferentes versões do sistema. Embora a estrutura básica e os principais elementos sejam consistentes, a localização exata de botões, ícones e menus pode variar ligeiramente dependendo da versão utilizada pela instituição. Adapte a busca por elementos conforme necessário.
+**Importante:** A interface do SEI pode apresentar variações entre diferentes versões do sistema. Embora a estrutura básica e os principais elementos sejam consistentes, a localização exata de alguns botões e ícones pode variar ligeiramente.
 
 ## Pré-requisitos
 - URL do SEI da instituição (solicitada ao usuário se não detectada automaticamente)
@@ -122,7 +122,7 @@ Clicar no botão [X] no canto superior direito do pop-up
 
 ## Fluxo: Trocar Unidade do Usuário
 
-Use este fluxo quando o usuário quiser trocar a unidade ativa no SEI. A unidade determina quais processos são exibidos no "Controle de Processos" e em qual contexto as ações são realizadas. Requer que o usuário já esteja autenticado no SEI (execute o Fluxo de Login primeiro, se necessário).
+Use este fluxo quando o usuário quiser trocar a unidade ativa no SEI. A unidade determina quais processos são exibidos no "Controle de Processos" e em qual contexto as ações são realizadas.
 
 ---
 
@@ -231,7 +231,7 @@ SENÃO
 
 ## Comportamento da Barra de Pesquisa Rápida
 
-A barra de pesquisa rápida no header (ao lado do botão "Menu") funciona para localizar tanto **processos** (pelo número no formato `XXXXX.XXXXXX/AAAA-DD`) quanto **documentos** (pelo número SEI, ex: `145869893`).
+A barra de pesquisa rápida no header (ao lado do botão "Menu") funciona para localizar tanto **processos** (pelo número no formato `XXXXX.XXXXXX/AAAA-DD`) quanto **documentos** (pelo número SEI).
 
 **Resultado quando encontrado:**
 - Processo: abre diretamente a página do processo com a árvore de documentos no painel esquerdo
@@ -292,6 +292,29 @@ Se o usuário já estiver autenticado no SEI, prosseguir diretamente para o Pass
 
 ---
 
+### **Passo 3: Expandir todos os volumes da árvore de documentos**
+**Objetivo:** Abrir todos os volumes do processo para facilitar a navegação pelos documentos
+
+**Ação:**
+Após o processo ser aberto, localizar e clicar no ícone "+" (expandir tudo) que fica à direita do número do processo na raiz da árvore de documentos (painel esquerdo).
+
+**Elemento a localizar:**
+- **Tipo:** Ícone/botão de expansão
+- **Visual:** Ícone "+" (sinal de mais) — aparece logo à direita do número do processo no topo da árvore
+- **Localização:** Painel esquerdo, linha do número do processo (raiz da árvore), após os ícones de cadeado/marcador
+- **Query para find:** `"expandir árvore de documentos"` ou `"botão + expandir processo"`
+
+**Verificação:**
+- Todos os volumes (I, II, III, etc.) devem aparecer expandidos, mostrando todos os documentos
+- Os documentos de cada volume ficam visíveis diretamente na árvore, sem necessidade de clicar em cada pasta
+
+**Notas Importantes:**
+- Este passo é **OBRIGATÓRIO** sempre que um processo for aberto — facilita a navegação e evita cliques extras nas pastas
+- Se o ícone "+" não estiver visível, tente rolar o painel esquerdo para cima até encontrá-lo na linha do número do processo
+- Após expandir, a árvore mostrará todos os documentos em ordem, prontos para navegação
+
+---
+
 ## Fluxo: Pesquisar e Abrir Documento pelo Número SEI
 
 Use este fluxo quando o usuário fornecer um número de documento SEI específico (ex: "abra o documento 145869893").
@@ -342,7 +365,7 @@ Se o usuário já estiver autenticado no SEI, prosseguir diretamente para o Pass
 
 ## Fluxo: Filtrar Processos Atribuídos ao Usuário
 
-Use este fluxo para exibir apenas os processos atribuídos ao usuário logado na página "Controle de Processos". Este fluxo é independente e pode ser combinado com outros fluxos. Requer que o usuário já esteja autenticado no SEI (execute o Fluxo de Login primeiro, se necessário).
+Use este fluxo para exibir apenas os processos atribuídos ao usuário logado na página "Controle de Processos". Este fluxo é independente e pode ser combinado com outros fluxos. Requer que o usuário já esteja autenticado.
 
 ### **Passo 1: Verificar acesso ao SEI**
 **Ação:**
@@ -415,7 +438,7 @@ SENÃO
 
 ## Fluxo: Gerar Arquivo ZIP de Processo
 
-Use este fluxo para gerar e baixar um arquivo ZIP contendo todos os documentos de um processo SEI. Este fluxo funciona em **qualquer processo já aberto**, independentemente de como você chegou a ele (pesquisa direta, filtro de atribuídos, navegação manual, etc.). Requer que o usuário já esteja autenticado no SEI (execute o Fluxo de Login primeiro, se necessário).
+Use este fluxo para gerar e baixar um arquivo ZIP contendo todos os documentos de um processo SEI. Este fluxo funciona em **qualquer processo já aberto**, independentemente de como você chegou até ele.
 
 ### **Passo 1: Verificar que está em um processo aberto**
 **Objetivo:** Confirmar que o usuário está visualizando um processo específico
@@ -576,7 +599,7 @@ Clicar no ícone "Controle de Processos" no header/navegação superior
 
 ## Fluxo: Resumir Processo
 
-Use este fluxo quando o usuário solicitar um resumo de um processo SEI aberto. O agente deve adaptar a estratégia de leitura conforme o tamanho do processo, priorizando sempre os documentos mais relevantes para identificar **por que o processo foi encaminhado ao setor do usuário**.
+Use este fluxo quando o usuário solicitar um resumo de um processo SEI aberto. O agente deve adaptar a estratégia de leitura conforme o tamanho do processo, priorizando sempre os documentos mais relevantes.
 
 ---
 
@@ -690,7 +713,7 @@ Produzir um resumo estruturado com os seguintes elementos:
 
 ### **Estratégia B: Processo com mais de 5 volumes — Leitura seletiva**
 
-Use quando o processo tiver **mais de 5 volumes**. Neste caso, leia os **5 primeiros** e os **5 últimos** documentos da árvore, que concentram as informações mais relevantes: a origem do processo e o motivo do encaminhamento ao setor atual.
+Use quando o processo tiver **mais de 5 volumes**. Neste caso, leia os **5 primeiros** e os **5 últimos** documentos da árvore, que concentram as informações mais relevantes: a origem do processo e seu estado atual.
 
 #### **Passo B1: Identificar e ler os 5 primeiros documentos**
 **Objetivo:** Compreender a origem e motivação inicial do processo
@@ -878,6 +901,8 @@ Os seguintes checkpoints devem ser validados em TODOS os ciclos:
 | **Fluxo: Trocar Unidade do Usuário** |
 | Página de troca aberta | 2 | Título "Trocar Unidade [SIGLA_ATUAL]" | ✓ Obrigatório |
 | Unidade trocada | 5 | Sigla da nova unidade no header | ✓ Obrigatório |
+| **Fluxo: Pesquisar e Abrir Processo pelo Número** |
+| Árvore expandida | 3 | Todos os volumes visíveis e expandidos | ✓ Obrigatório |
 | **Fluxo: Filtrar Processos Atribuídos ao Usuário** |
 | Filtro aplicado | 3 | "Remover filtro de processos atribuídos a mim" | ✓ Obrigatório |
 | **Fluxo: Gerar Arquivo ZIP de Processo** |
@@ -906,6 +931,11 @@ Os seguintes checkpoints devem ser validados em TODOS os ciclos:
 ✅ Unidade trocada para a unidade desejada  
 ✅ Campo de unidade no header exibe a nova sigla  
 ✅ Página "Controle de Processos" exibindo processos da nova unidade
+
+### Após completar o Fluxo "Pesquisar e Abrir Processo pelo Número":
+✅ Processo localizado e aberto  
+✅ Árvore de documentos totalmente expandida  
+✅ Volumes e documentos visíveis para navegação
 
 ### Após completar o Fluxo "Filtrar Processos Atribuídos ao Usuário":
 ✅ Filtro "Atribuídos a mim" aplicado e ativo  
