@@ -1,0 +1,31 @@
+Fonte: https://github.com/browser-use/video-use/blob/main/SKILL.md
+
+# video-use
+
+A skill **video-use** é um projeto **open source e gratuito** que permite a edição de vídeos utilizando apenas **prompts de texto**. Ela funciona como um pacote de scripts e automações que ensinam ao modelo de IA Claude como realizar tarefas como cortar segmentos, juntar clipes, normalizar áudio e realizar correções de cores. O diferencial técnico desta ferramenta é que ela guia a edição através da **transcrição do áudio** (locução e timestamps) e não pelos frames da imagem, o que torna o processo significativamente mais barato e eficiente para a IA processar.
+
+### Para quais vídeos ela é útil?
+A ferramenta é extremamente eficaz para conteúdos baseados em **voz e fala**, onde o objetivo é limpar o material bruto:
+*   **Vídeos de YouTube:** Útil para remover automaticamente erros de fala, silêncios longos, respiros e refações (quando você grava a mesma frase várias vezes até acertar).
+*   **Podcasts:** Ideal para criar cortes e identificar ganchos virais a partir da transcrição da conversa.
+*   **Vídeos com locução direta:** Qualquer conteúdo onde a estrutura da edição siga o que está sendo dito.
+
+### Para quais vídeos NÃO é útil?
+A skill possui limitações claras dependendo do estilo de edição:
+*   **Vídeos sem som ou voz:** Como a edição depende da transcrição, vídeos puramente visuais não podem ser processados por ela.
+*   **Vídeos com B-roll:** Se a locução for separada das cenas (como um narrador falando sobre imagens que não coincidem com o tempo da fala original), a ferramenta terá dificuldades.
+*   **Animações e Motion Graphics:** Para criar animações do zero ou gráficos em movimento, as fontes recomendam o uso do **Remotion** em vez do video-use.
+*   **Edições rápidas de redes sociais:** Vídeos já pré-editados em ferramentas como o "Edits" do Instagram não se beneficiam tanto desta skill.
+
+### Como instalar a skill 'video-use'
+O processo de instalação deve ser feito via **Claude Code** (a interface de linha de comando da Anthropic):
+
+1.  **Comando de Instalação:** Copie a URL do repositório da skill no GitHub, cole no terminal do Claude Code e digite: **"Leia isso aqui e instale essa skill para mim"**.
+2.  **Permissões:** Aceite todas as permissões que o Claude solicitar durante o processo.
+3.  **Reiniciar Sessão:** Após a instalação, inicie uma **nova sessão** (`New Session`) dentro da pasta do seu projeto para que a skill seja reconhecida corretamente.
+4.  **Configuração da API (ElevenLabs):**
+    *   Crie um arquivo chamado **`.env`** na pasta do projeto.
+    *   Adicione sua chave de API da ElevenLabs (necessária para a transcrição) no formato: `ELEVENLABS_API_KEY=sua_chave_aqui`.
+5.  **Inicialização do Contexto:** No terminal, dentro da pasta do projeto, digite o comando **`init`**. Isso criará um arquivo chamado **`claude.md`**, que fornecerá ao Claude todo o contexto necessário sobre onde estão os vídeos e as chaves de API sempre que uma nova conversa for iniciada.
+
+Após esses passos, basta colocar seu vídeo na pasta e pedir: **"Edite esse vídeo para mim usando a skill video-use, remova respiros e refações"**.
